@@ -9,8 +9,8 @@ class Document:
     def __init__(self, text: str, language = 'en', model = 'en_core_web_sm', options = Options()):
         # Save initial text
         self.text = text
-        self.options = options 
-        
+        self.options = options
+
         # Tokenized resume
         nlp = spacy.load(model, disable = ['ner'])
         self.doc = nlp(text)
@@ -30,7 +30,7 @@ class Document:
                 matcher.add(section.name, section.is_header, section.get_pattern(language))
             matcher(self.doc)
 
-            
+
             section_list = [] # holds the sections, in order
 
             # Get the sections, their start and end
@@ -41,13 +41,12 @@ class Document:
                         section_list[len(section_list) - 1]['end_char'] = ent.start_char - 1
                     section_list.append({'name': ent.label_.lower(), 'start': ent.start, 'start_char': ent.start_char})
 
-            # Save the sections into a dictionary 
+            # Save the sections into a dictionary
             for index, section in enumerate(section_list):
                 if index != len(section_list) - 1:
                     self.sections[section['name']] = {'tokens': self.doc[section['start'] : section['end']], 'start': section['start'], 'end': section['end'], 'start_char': section['start_char'], 'end_char': section['end_char']}
                 else:
                     self.sections[section['name']] = {'tokens': self.doc[section['start'] :], 'start': section['start'], 'end': len(self.doc), 'start_char': section['start_char'], 'end_char': len(self.doc.text)}
-
 
 
     def _extract_keywords_from_doc(self) -> dict:
@@ -62,7 +61,7 @@ class Document:
         return tokens_with_context
 
     def _extract_domain_keywords_from_keywords(self) -> list:
-        ''' Search domain keywords into the keyword list. 
+        ''' Search domain keywords into the keyword list.
         The domain_keywords list in options determines the keywords that are going to be matched. '''
 
         if not self.keywords:
@@ -70,9 +69,8 @@ class Document:
 
         domain_keywords = list()
         for keyword in self.keywords.keys():
-            if keyword in self.options.domain_keywords:
+            if keyword.lower() in list(map(str.lower, self.options.domain_keywords)):
                 domain_keywords.append(keyword)
-
         return domain_keywords
 
     def has_section(self, section: str) -> bool:
